@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 .leaflet-container {
   height: 100vh;
 }

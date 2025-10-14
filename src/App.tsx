@@ -48,8 +48,8 @@ const MARKERS: MarkerData[] = [
 function App() {
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <div style={{ flex: 1, position: 'relative' }}>
+    <div className="flex h-screen">
+      <div className="flex-1 relative">
         <MapContainer center={[51.505, -0.09]} zoom={13}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -61,7 +61,7 @@ function App() {
                 <div>
                   <h3>{marker.title}</h3>
                   <p>{marker.description}</p>
-                  <img src={marker.image} alt={marker.title} style={{ width: '100%' }} />
+                  <img src={marker.image} alt={marker.title}/>
                   <p>Status: {marker.status == TraceStatus.ACTIVE ? "Active" : "Inactive"}</p>
                 </div>
               </Popup>
