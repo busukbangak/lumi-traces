@@ -1,22 +1,8 @@
 import 'leaflet/dist/leaflet.css'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-
-enum TraceStatus {
-  ACTIVE,
-  MISSING,
-  PENDING,
-  REMOVED,
-  INVALID
-}
-
-interface MarkerData {
-  id: number
-  status: TraceStatus
-  position: [number, number]
-  title: string
-  description: string
-  image: string
-}
+import { useState } from 'react'
+import Map from './components/Map'
+import { TraceStatus, type MarkerData } from './types/types'
+import Sidebar from './components/Sidebar';
 
 const MARKERS: MarkerData[] = [
   {
@@ -43,34 +29,19 @@ const MARKERS: MarkerData[] = [
     description: "Historic area with great restaurants",
     image: "https://picsum.photos/300/200?random=3",
   }
-]
+];
 
 function App() {
+  const [markers] = useState<MarkerData[]>(MARKERS) // TODO: fetch from API
+  const [visibleMarkers, setVisibleMarkers] = useState<MarkerData[]>([]) // Todo: update via state management
 
   return (
     <div className="flex h-screen">
       <div className="flex-1 relative">
-        <MapContainer center={[51.505, -0.09]} zoom={13}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {MARKERS.map(marker => (
-            <Marker key={marker.id} position={marker.position}>
-              <Popup>
-                <div>
-                  <h3>{marker.title}</h3>
-                  <p>{marker.description}</p>
-                  <img src={marker.image} alt={marker.title}/>
-                  <p>Status: {marker.status == TraceStatus.ACTIVE ? "Active" : "Inactive"}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+        <Map markers={markers} onVisibleMarkersUpdate={setVisibleMarkers} />
       </div>
+      <Sidebar visibleMarkers={visibleMarkers} />
     </div>
-
   )
 }
 
