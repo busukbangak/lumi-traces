@@ -30,6 +30,7 @@ process.on('SIGINT', async () => {
   await disconnectDB()
   process.exit(0)
 })
+
 process.on('SIGTERM', async () => {
   await disconnectDB()
   process.exit(0)
