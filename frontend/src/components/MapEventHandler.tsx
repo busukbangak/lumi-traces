@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
-import type { MarkerData } from '../types/types'
+import type { TraceData } from '../types/types'
 
 interface MapEventHandlerProps {
-    markers: MarkerData[]
-    onVisibleMarkersUpdate: (visible: MarkerData[]) => void
+    markers: TraceData[]
+    onVisibleMarkersUpdate: (visible: TraceData[]) => void
 }
 
 export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ markers, onVisibleMarkersUpdate }) => {

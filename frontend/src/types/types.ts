@@ -1,4 +1,4 @@
-export interface MarkerData {
+export interface TraceData {
     id: number
     status: TraceStatus
     position: [number, number]

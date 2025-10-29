@@ -36,3 +36,9 @@ process.on('SIGTERM', async () => {
 
 // Start server
 start();
+
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK' });
+});

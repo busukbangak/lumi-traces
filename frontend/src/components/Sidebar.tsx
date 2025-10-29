@@ -1,9 +1,9 @@
 import React from 'react'
 import { statusText } from '../utils/utils'
-import type { MarkerData } from '../types/types'
+import type { TraceData } from '../types/types'
 
 interface SidebarProps {
-  visibleMarkers: MarkerData[]
+  visibleMarkers: TraceData[]
 }
 
 function Sidebar({ visibleMarkers }: SidebarProps) {

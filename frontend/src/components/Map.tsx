@@ -1,12 +1,12 @@
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import type { MarkerData } from '../types/types'
+import type { TraceData } from '../types/types'
 import { MapEventHandler } from './MapEventHandler'
 import { statusText } from '../utils/utils'
 
 interface MapProps {
-    markers: MarkerData[]
-    onVisibleMarkersUpdate: (visible: MarkerData[]) => void
+    markers: TraceData[]
+    onVisibleMarkersUpdate: (visible: TraceData[]) => void
 }
 
 function Map({ markers, onVisibleMarkersUpdate }: MapProps) {

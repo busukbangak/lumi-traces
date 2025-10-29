@@ -1,10 +1,10 @@
 import 'leaflet/dist/leaflet.css'
 import { useState } from 'react'
 import Map from './components/Map'
-import { TraceStatus, type MarkerData } from './types/types'
+import { TraceStatus, type TraceData } from './types/types'
 import Sidebar from './components/Sidebar';
 
-const MARKERS: MarkerData[] = [
+const MARKERS: TraceData[] = [
   {
     id: 1,
     status: TraceStatus.ACTIVE,
@@ -32,8 +32,8 @@ const MARKERS: MarkerData[] = [
 ];
 
 function App() {
-  const [markers] = useState<MarkerData[]>(MARKERS) // TODO: fetch from API
-  const [visibleMarkers, setVisibleMarkers] = useState<MarkerData[]>([]) // Todo: update via state management
+  const [markers] = useState<TraceData[]>(MARKERS) // TODO: fetch from API
+  const [visibleMarkers, setVisibleMarkers] = useState<TraceData[]>([]) // Todo: update via state management
 
   return (
     <div className="flex h-screen">
