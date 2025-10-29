@@ -4,7 +4,7 @@ import Map from './components/Map'
 import { TraceStatus, type TraceData } from './types/types'
 import Sidebar from './components/Sidebar';
 
-const MARKERS: TraceData[] = [
+const TRACES: TraceData[] = [
   {
     id: 1,
     status: TraceStatus.ACTIVE,
@@ -32,15 +32,15 @@ const MARKERS: TraceData[] = [
 ];
 
 function App() {
-  const [markers] = useState<TraceData[]>(MARKERS) // TODO: fetch from API
-  const [visibleMarkers, setVisibleMarkers] = useState<TraceData[]>([]) // Todo: update via state management
+  const [traces] = useState<TraceData[]>(TRACES) // TODO: fetch from API
+  const [visibleTraces, setVisibleTraces] = useState<TraceData[]>([]) // Todo: update via state management
 
   return (
     <div className="flex h-screen">
       <div className="flex-1 relative">
-        <Map markers={markers} onVisibleMarkersUpdate={setVisibleMarkers} />
+        <Map traces={traces} onVisibleTracesUpdate={setVisibleTraces} />
       </div>
-      <Sidebar visibleMarkers={visibleMarkers} />
+      <Sidebar visibleTraces={visibleTraces} />
     </div>
   )
 }

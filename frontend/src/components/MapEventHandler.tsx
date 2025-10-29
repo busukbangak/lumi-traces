@@ -3,22 +3,22 @@ import { useMap } from 'react-leaflet'
 import type { TraceData } from '../types/types'
 
 interface MapEventHandlerProps {
-    markers: TraceData[]
-    onVisibleMarkersUpdate: (visible: TraceData[]) => void
+    traces: TraceData[]
+    onVisibleTracesUpdate: (visible: TraceData[]) => void
 }
 
-export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ markers, onVisibleMarkersUpdate }) => {
+export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ traces, onVisibleTracesUpdate }) => {
     const map = useMap()
 
-    // Update visible markers on map move or zoom
+    // Update visible traces on map move or zoom
     useEffect(() => {
         if (!map) return
 
         const updateVisibleMapMarkers = () => {
             try {
                 const bounds = map.getBounds()
-                const visibleMarkers = markers.filter(m => bounds.contains([m.position[0], m.position[1]]))
-                onVisibleMarkersUpdate(visibleMarkers)
+                const visibleTraces = traces.filter(m => bounds.contains([m.position[0], m.position[1]]))
+                onVisibleTracesUpdate(visibleTraces)
             } catch {
                 // ignore
             }
@@ -34,7 +34,7 @@ export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ markers, onVis
             map.off('moveend', updateVisibleMapMarkers)
             map.off('zoomend', updateVisibleMapMarkers)
         }
-    }, [map, markers, onVisibleMarkersUpdate])
+    }, [map, traces, onVisibleTracesUpdate])
 
     return null
 }

@@ -5,21 +5,21 @@ import { MapEventHandler } from './MapEventHandler'
 import { statusText } from '../utils/utils'
 
 interface MapProps {
-    markers: TraceData[]
-    onVisibleMarkersUpdate: (visible: TraceData[]) => void
+    traces: TraceData[]
+    onVisibleTracesUpdate: (visible: TraceData[]) => void
 }
 
-function Map({ markers, onVisibleMarkersUpdate }: MapProps) {
+function Map({ traces, onVisibleTracesUpdate }: MapProps) {
     return (
         <MapContainer center={[51.505, -0.09]} zoom={13} className="h-full">
-            <MapEventHandler markers={markers} onVisibleMarkersUpdate={onVisibleMarkersUpdate} />
+            <MapEventHandler traces={traces} onVisibleTracesUpdate={onVisibleTracesUpdate} />
 
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {markers.map(marker => (
+            {traces.map(marker => (
                 <Marker key={marker.id} position={marker.position}>
                     <Popup>
                         <div>
