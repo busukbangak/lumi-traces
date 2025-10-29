@@ -1,6 +1,6 @@
-export interface TraceData {
-    id: number
-    status: TraceStatus
+export interface Trace {
+    _id: string
+    status: TraceStatus | string
     position: [number, number]
     title: string
     description: string
@@ -8,9 +8,9 @@ export interface TraceData {
 }
 
 export enum TraceStatus {
-    ACTIVE,
-    MISSING,
-    PENDING,
-    REMOVED,
-    INVALID
+    ACTIVE = 'ACTIVE',
+    MISSING = 'MISSING',
+    PENDING = 'PENDING',
+    REMOVED = 'REMOVED',
+    INVALID = 'INVALID'
 }

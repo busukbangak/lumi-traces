@@ -1,18 +1,14 @@
 import { TraceStatus } from "../types/types"
 
-export const statusText = (status: TraceStatus) => {
-    switch (status) {
-        case TraceStatus.ACTIVE:
-            return 'Active'
-        case TraceStatus.PENDING:
-            return 'Pending'
-        case TraceStatus.MISSING:
-            return 'Missing'
-        case TraceStatus.REMOVED:
-            return 'Removed'
-        case TraceStatus.INVALID:
-            return 'Invalid'
-        default:
-            return 'Unknown'
-    }
+const STATUS_LABELS: Record<string, string> = {
+    ACTIVE: 'Active',
+    PENDING: 'Pending',
+    MISSING: 'Missing',
+    REMOVED: 'Removed',
+    INVALID: 'Invalid',
+}
+
+export const getStatusText = (status: TraceStatus | string) => {
+    const key = typeof status === 'string' ? status : String(status)
+    return STATUS_LABELS[key] ?? 'Unknown'
 }

@@ -1,9 +1,9 @@
 import React from 'react'
-import { statusText } from '../utils/utils'
-import type { TraceData } from '../types/types'
+import { getStatusText } from '../utils/utils'
+import type { Trace } from '../types/types'
 
 interface SidebarProps {
-  visibleTraces: TraceData[]
+  visibleTraces: Trace[]
 }
 
 function Sidebar({ visibleTraces }: SidebarProps) {
@@ -16,11 +16,11 @@ function Sidebar({ visibleTraces }: SidebarProps) {
       ) : (
         <div className="space-y-4">
           {visibleTraces.map(marker => (
-            <div key={marker.id} className="border rounded overflow-hidden">
+            <div key={marker._id} className="border rounded overflow-hidden">
               <img src={marker.image} alt={marker.title} className="w-full h-36 object-cover" />
               <div className="p-2">
                 <div className="font-medium">{marker.title}</div>
-                <div className="text-sm text-gray-600">{statusText(marker.status)}</div>
+                <div className="text-sm text-gray-600">{getStatusText(marker.status)}</div>
               </div>
             </div>
           ))}

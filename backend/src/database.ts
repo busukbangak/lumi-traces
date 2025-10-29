@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { GridFSBucket } from 'mongodb';
 
 export async function connectDB(uri: string, dbName?: string) {
     if (mongoose.connection.readyState === 1) return mongoose.connection

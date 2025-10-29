@@ -1,39 +1,48 @@
 import 'leaflet/dist/leaflet.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Map from './components/Map'
-import { TraceStatus, type TraceData } from './types/types'
 import Sidebar from './components/Sidebar';
+import type { Trace } from './types/types';
 
-const TRACES: TraceData[] = [
-  {
-    id: 1,
-    status: TraceStatus.ACTIVE,
-    position: [51.505, -0.09],
-    title: "London Central",
-    description: "Heart of London with amazing attractions",
-    image: "https://picsum.photos/300/200?random=1",
-  },
-  {
-    id: 2,
-    status: TraceStatus.PENDING,
-    position: [51.515, -0.1],
-    title: "North London",
-    description: "Vibrant area with parks and museums",
-    image: "https://picsum.photos/300/200?random=2",
-  },
-  {
-    id: 3,
-    status: TraceStatus.MISSING,
-    position: [51.495, -0.08],
-    title: "South London",
-    description: "Historic area with great restaurants",
-    image: "https://picsum.photos/300/200?random=3",
-  }
-];
 
 function App() {
-  const [traces] = useState<TraceData[]>(TRACES) // TODO: fetch from API
-  const [visibleTraces, setVisibleTraces] = useState<TraceData[]>([]) // Todo: update via state management
+  const [traces, setTraces] = useState<Trace[]>([])
+  const [visibleTraces, setVisibleTraces] = useState<Trace[]>([]) // Todo: update via state management
+  const [isLoading, setIsLoading] = useState(true)
+  const [isError, setIsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchTraces = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/traces`)
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch traces')
+        }
+
+        const data = await response.json()
+
+        setTraces(data)
+        setIsError(null)
+      } catch (err) {
+        setIsError(err instanceof Error ? err.message : 'An error occurred')
+        console.error('Error fetching traces:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTraces()
+  }, [])
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading traces...</div>
+  }
+
+  if (isError) {
+    return <div className="flex h-screen items-center justify-center text-red-500">Error: {isError}</div>
+  }
 
   return (
     <div className="flex h-screen">

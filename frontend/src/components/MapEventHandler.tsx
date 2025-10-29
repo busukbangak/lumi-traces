@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
-import type { TraceData } from '../types/types'
+import type { Trace } from '../types/types'
 
 interface MapEventHandlerProps {
-    traces: TraceData[]
-    onVisibleTracesUpdate: (visible: TraceData[]) => void
+    traces: Trace[]
+    onVisibleTracesUpdate: (visible: Trace[]) => void
 }
 
 export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ traces, onVisibleTracesUpdate }) => {

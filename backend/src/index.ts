@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express'
 import cors from 'cors'
 import { connectDB, disconnectDB } from './database'
+import tracesRoutes from './routes/tracesRoutes';
 
 const PORT = Number(process.env.PORT) || 3001
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
@@ -34,11 +35,14 @@ process.on('SIGTERM', async () => {
   process.exit(0)
 })
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
+// Routes
+app.use('/api', tracesRoutes);
+
 // Start server
 start();
 
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK' });
-});
