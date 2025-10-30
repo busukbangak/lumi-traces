@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { connectDB, disconnectDB } from './database'
 import tracesRoutes from './routes/tracesRoutes';
+import imageRoutes from './routes/imagesRoutes';
 
 const PORT = Number(process.env.PORT) || 3001
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
@@ -13,19 +14,20 @@ app.use(cors())
 app.use(express.json())
 
 async function start() {
-  try {
-    await connectDB(MONGODB_URI, DB_NAME)
+  // Database Connection
+  await connectDB(MONGODB_URI, DB_NAME);
 
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`)
-    })
-  } catch (err) {
-    console.error('MongoDB connection failed:', err)
-    process.exit(1)
-  }
+  // Routes
+  app.use('/api', imageRoutes);
+  app.use('/api', tracesRoutes);
+
+  // Server Start
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`)
+  })
 }
 
-// Graceful shutdown
+// Disconnect DB on termination signals
 process.on('SIGINT', async () => {
   await disconnectDB()
   process.exit(0)
@@ -36,14 +38,8 @@ process.on('SIGTERM', async () => {
   process.exit(0)
 })
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
+// Start the server
+start().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
-
-// Routes
-app.use('/api', tracesRoutes);
-
-// Start server
-start();
-

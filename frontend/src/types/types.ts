@@ -4,7 +4,7 @@ export interface Trace {
     position: [number, number]
     title: string
     description: string
-    image: string
+    imageID: string
 }
 
 export enum TraceStatus {
