@@ -25,7 +25,7 @@ function Map({ traces, onVisibleTracesUpdate }: MapProps) {
                         <div>
                             <h3>{marker.title}</h3>
                             <p>{marker.description}</p>
-                            <img src={marker.image} alt={marker.title} />
+                            <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} />
                             <p>Status: {getStatusText(marker.status)}</p>
                         </div>
                     </Popup>

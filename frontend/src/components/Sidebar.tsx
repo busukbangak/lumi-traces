@@ -17,7 +17,7 @@ function Sidebar({ visibleTraces }: SidebarProps) {
         <div className="space-y-4">
           {visibleTraces.map(marker => (
             <div key={marker._id} className="border rounded overflow-hidden">
-              <img src={marker.image} alt={marker.title} className="w-full h-36 object-cover" />
+              <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} className="w-full h-36 object-cover" />
               <div className="p-2">
                 <div className="font-medium">{marker.title}</div>
                 <div className="text-sm text-gray-600">{getStatusText(marker.status)}</div>
