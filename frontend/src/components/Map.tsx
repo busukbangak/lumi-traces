@@ -1,8 +1,12 @@
 import 'leaflet/dist/leaflet.css'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import type { Trace } from '../types/types'
-import { MapEventHandler } from './MapEventHandler'
-import { getStatusText } from '../utils/utils'
+import { MapContainer, TileLayer } from 'react-leaflet'
+import { type Trace } from '../types/types'
+import MapMarker from './MapMarker'
+import MapEventHandler from './MapEventHandler'
+
+// Tile layer constants
+const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 interface MapProps {
     traces: Trace[]
@@ -11,26 +15,15 @@ interface MapProps {
 
 function Map({ traces, onVisibleTracesUpdate }: MapProps) {
     return (
-        <MapContainer center={[51.505, -0.09]} zoom={13} className="h-full">
+        <MapContainer center={[20, 0]} zoom={2.5} className="h-full">
+            {/* Handle map events */}
             <MapEventHandler traces={traces} onVisibleTracesUpdate={onVisibleTracesUpdate} />
 
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            {/* Display tile layers */}
+            <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
 
-            {traces.map(marker => (
-                <Marker key={marker._id} position={marker.position}>
-                    <Popup>
-                        <div>
-                            <h3>{marker.title}</h3>
-                            <p>{marker.description}</p>
-                            <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} />
-                            <p>Status: {getStatusText(marker.status)}</p>
-                        </div>
-                    </Popup>
-                </Marker>
-            ))}
+            {/* Display lumi map marker traces */}
+            {traces.map(trace => (<MapMarker key={trace._id} trace={trace} />))}
         </MapContainer>
     )
 }

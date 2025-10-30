@@ -1,12 +1,10 @@
-import React from 'react'
-import { getStatusText } from '../utils/utils'
 import type { Trace } from '../types/types'
 
 interface SidebarProps {
   visibleTraces: Trace[]
 }
 
-function Sidebar({ visibleTraces }: SidebarProps) {
+export default function Sidebar({ visibleTraces }: SidebarProps) {
 
   return (
     <aside className="w-80 bg-white border-r overflow-y-auto p-4">
@@ -20,7 +18,7 @@ function Sidebar({ visibleTraces }: SidebarProps) {
               <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} className="w-full h-36 object-cover" />
               <div className="p-2">
                 <div className="font-medium">{marker.title}</div>
-                <div className="text-sm text-gray-600">{getStatusText(marker.status)}</div>
+                <div className="text-sm text-gray-600">{marker.status}</div>
               </div>
             </div>
           ))}
@@ -30,4 +28,3 @@ function Sidebar({ visibleTraces }: SidebarProps) {
   )
 }
 
-export default Sidebar

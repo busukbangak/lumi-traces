@@ -1,40 +1,19 @@
 import { useEffect } from 'react'
-import { useMap } from 'react-leaflet'
 import type { Trace } from '../types/types'
+import { useVisibleTraces } from '../hooks/useVisibleTraces'
 
 interface MapEventHandlerProps {
     traces: Trace[]
     onVisibleTracesUpdate: (visible: Trace[]) => void
 }
 
-export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ traces, onVisibleTracesUpdate }) => {
-    const map = useMap()
+export default function MapEventHandler({ traces, onVisibleTracesUpdate }: MapEventHandlerProps) {
+    const visibleTraces = useVisibleTraces(traces)
 
-    // Update visible traces on map move or zoom
+    // Update visible traces via hook
     useEffect(() => {
-        if (!map) return
-
-        const updateVisibleMapMarkers = () => {
-            try {
-                const bounds = map.getBounds()
-                const visibleTraces = traces.filter(m => bounds.contains([m.position[0], m.position[1]]))
-                onVisibleTracesUpdate(visibleTraces)
-            } catch {
-                // ignore
-            }
-        }
-
-        // initial check
-        updateVisibleMapMarkers()
-
-        map.on('moveend', updateVisibleMapMarkers)
-        map.on('zoomend', updateVisibleMapMarkers)
-
-        return () => {
-            map.off('moveend', updateVisibleMapMarkers)
-            map.off('zoomend', updateVisibleMapMarkers)
-        }
-    }, [map, traces, onVisibleTracesUpdate])
+        onVisibleTracesUpdate(visibleTraces)
+    }, [visibleTraces, onVisibleTracesUpdate])
 
     return null
 }

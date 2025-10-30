@@ -5,6 +5,7 @@ export interface Trace {
     title: string
     description: string
     imageID: string
+    traceType: TraceType | string
 }
 
 export enum TraceStatus {
@@ -13,4 +14,9 @@ export enum TraceStatus {
     PENDING = 'PENDING',
     REMOVED = 'REMOVED',
     INVALID = 'INVALID'
+}
+
+export enum TraceType {
+    Adventure = 'ADVENTURE',
+    Knowledge = 'KNOWLEDGE',
 }
