@@ -20,6 +20,8 @@ const traceSchema = new mongoose.Schema({
     description: { type: String, required: true }, // Description field
     imageID: { type: Schema.Types.ObjectId, ref: 'images.files', required: true }, // Image field
     traceType: { type: String, enum: Object.values(TraceType), required: true }, // Trace type field
+    dateSpotted: { type: Date, required: true }, // Date found
+    tracker: { type: String, required: true }, // User who tracked the trace
 });
 
 export const Trace = mongoose.model('Trace', traceSchema);

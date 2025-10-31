@@ -6,6 +6,8 @@ export interface Trace {
     description: string
     imageID: string
     traceType: TraceType | string
+    dateSpotted: string
+    tracker: string
 }
 
 export enum TraceStatus {
