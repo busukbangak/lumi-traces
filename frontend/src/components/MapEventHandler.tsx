@@ -1,19 +1,16 @@
 import { useEffect } from 'react'
-import type { Trace } from '../types/types'
-import { useVisibleTraces } from '../hooks/useVisibleTraces'
+import { useAppDispatch, useAppSelector, useVisibleTraces } from '../hooks/hooks'
+import { setVisibleTraces } from '../store/slices/tracesSlice'
 
-interface MapEventHandlerProps {
-    traces: Trace[]
-    onVisibleTracesUpdate: (visible: Trace[]) => void
-}
-
-export default function MapEventHandler({ traces, onVisibleTracesUpdate }: MapEventHandlerProps) {
+export default function MapEventHandler() {
+    const dispatch = useAppDispatch()
+    const traces = useAppSelector(state => state.traces.items)
     const visibleTraces = useVisibleTraces(traces)
 
-    // Update visible traces via hook
+    // Push visible traces into redux on change
     useEffect(() => {
-        onVisibleTracesUpdate(visibleTraces)
-    }, [visibleTraces, onVisibleTracesUpdate])
+        dispatch(setVisibleTraces(visibleTraces))
+    }, [dispatch, visibleTraces])
 
     return null
 }

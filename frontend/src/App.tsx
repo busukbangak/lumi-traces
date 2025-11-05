@@ -1,57 +1,46 @@
-import 'leaflet/dist/leaflet.css'
-import { useEffect, useState } from 'react'
-import Map from './components/Map'
-import Sidebar from './components/Sidebar';
-import type { Trace } from './types/types';
+import './styles/styles.css'
+import { StrictMode, useEffect } from 'react'
+import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { store, type RootState } from './store/store.ts'
+import Sidebar from './components/Sidebar.tsx'
+import { useAppDispatch, useAppSelector } from './hooks/hooks.ts'
+import { fetchTraces } from './store/slices/tracesSlice.ts'
+import Map from './components/Map.tsx'
 
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>
+);
 
-function App() {
-  const [traces, setTraces] = useState<Trace[]>([])
-  const [visibleTraces, setVisibleTraces] = useState<Trace[]>([]) // Todo: update via state management
-  const [isLoading, setIsLoading] = useState(true)
-  const [isError, setIsError] = useState<string | null>(null)
+export default function App() {
+  const dispatch = useAppDispatch()
+  const isLoading = useAppSelector((state: RootState) => state.traces.isLoading)
+  const error = useAppSelector((state: RootState) => state.traces.error)
 
+  // Load lumis traces on app start
   useEffect(() => {
-    const fetchTraces = async () => {
-      try {
-        setIsLoading(true)
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/traces`)
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch traces')
-        }
-
-        const data = await response.json()
-
-        setTraces(data)
-        setIsError(null)
-      } catch (err) {
-        setIsError(err instanceof Error ? err.message : 'An error occurred')
-        console.error('Error fetching traces:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchTraces()
-  }, [])
+    dispatch(fetchTraces())
+  }, [dispatch])
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center">Loading traces...</div>
   }
 
-  if (isError) {
-    return <div className="flex h-screen items-center justify-center text-red-500">Error: {isError}</div>
+  if (error) {
+    return <div className="flex h-screen items-center justify-center text-red-500">Error: {error}</div>
   }
 
   return (
     <div className="flex h-screen">
       <div className="flex-1 relative">
-        <Map traces={traces} onVisibleTracesUpdate={setVisibleTraces} />
+        <Map />
       </div>
-      <Sidebar visibleTraces={visibleTraces} />
+      <Sidebar />
     </div>
   )
 }
 
-export default App

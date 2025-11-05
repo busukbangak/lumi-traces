@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react'
-import { useMap } from 'react-leaflet'
-import type { Trace } from '../types/types'
+import { useState, useEffect } from "react"
+import { useMap } from "react-leaflet"
+import { useDispatch, type TypedUseSelectorHook, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../store/store"
+import type { Trace } from "../types/types"
+
+export const useAppDispatch: () => AppDispatch = useDispatch
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export function useVisibleTraces(traces: Trace[]) {
     const map = useMap()

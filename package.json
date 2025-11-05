@@ -18,6 +18,8 @@
     "install:backend": "npm install -w backend"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "react": "*",
+    "react-dom": "*"
   }
 }
