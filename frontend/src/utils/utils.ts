@@ -36,3 +36,13 @@ export const getMarkerIcon = (traceType: TraceType) => {
             })
     }
 }
+
+
+// Convert date to YYYY-MM-DD format for input[type="date"]
+export const formatDateForInput = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return "";
+
+    return date.toISOString().split('T')[0]
+}

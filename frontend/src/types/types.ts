@@ -22,3 +22,10 @@ export enum TraceType {
     Adventure = 'ADVENTURE',
     Knowledge = 'KNOWLEDGE',
 }
+
+export interface ExifData {
+    latitude?: number
+    longitude?: number
+    DateTimeOriginal?: Date | string
+    [key: string]: unknown
+}
