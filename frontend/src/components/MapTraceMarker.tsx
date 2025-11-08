@@ -10,7 +10,7 @@ interface TraceProps {
     trace: Trace
 }
 
-export default function MapMarker({ trace }: TraceProps) {
+export default function MapTraceMarker({ trace }: TraceProps) {
     const dispatch = useAppDispatch()
     const { isAuthenticated, token } = useAppSelector(state => state.auth)
 

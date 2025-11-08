@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer } from 'react-leaflet'
-import MapMarker from './MapMarker'
+import MapTraceMarker from './MapTraceMarker'
 import MapEventHandler from './MapEventHandler'
 import type { RootState } from '../store/store'
 import type { Trace } from '../types/types'
@@ -21,7 +21,7 @@ function Map() {
             <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
 
             {/* Display lumi map marker traces */}
-            {traces.map((trace: Trace) => (<MapMarker key={trace._id} trace={trace} />))}
+            {traces.map((trace: Trace) => (<MapTraceMarker key={trace._id} trace={trace} />))}
         </MapContainer>
     )
 }
