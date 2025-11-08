@@ -37,12 +37,12 @@ export const login = createAsyncThunk<
   }
 )
 
-export const verifyToken = createAsyncThunk<
-  boolean,
+export const userReturn = createAsyncThunk<
+  { user: { username: string; role: string } },
   void,
   { rejectValue: string }
 >(
-  'auth/verify',
+  'auth/return',
   async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState() as { auth: AuthState }
@@ -52,13 +52,13 @@ export const verifyToken = createAsyncThunk<
         return rejectWithValue('No token found')
       }
 
-      await axios.get(`${import.meta.env.VITE_API_URL}/auth/verify`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/auth/return`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      return true
+      return data
     } catch {
       localStorage.removeItem('token')
-      return rejectWithValue('Token verification failed')
+      return rejectWithValue('Failed to return user. Token invalid')
     }
   }
 )
@@ -95,15 +95,16 @@ const authSlice = createSlice({
         state.isLoading = false
         state.error = action.payload ?? 'Login failed'
       })
-      // Verify token
-      .addCase(verifyToken.pending, state => {
+      // Return user session
+      .addCase(userReturn.pending, state => {
         state.isLoading = true
       })
-      .addCase(verifyToken.fulfilled, state => {
+      .addCase(userReturn.fulfilled, (state, action) => {
         state.isLoading = false
         state.isAuthenticated = true
+        state.user = action.payload.user
       })
-      .addCase(verifyToken.rejected, state => {
+      .addCase(userReturn.rejected, state => {
         state.isLoading = false
         state.isAuthenticated = false
         state.token = null

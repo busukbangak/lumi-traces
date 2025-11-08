@@ -76,7 +76,11 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-export const verifyToken = (req: Request, res: Response) => {
+export const userReturn = (req: Request, res: Response) => {
     // If we reach here, token is valid (checked by middleware)
-    res.status(200).json({ valid: true });
+    // The user data is attached to req by the authenticateToken middleware
+    const user = (req as any).user;
+    res.status(200).json({ 
+        user: { username: user.username, role: user.role }
+    });
 };
