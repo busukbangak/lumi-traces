@@ -2,6 +2,7 @@ import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import MapTraceMarker from './MapTraceMarker'
 import MapEventHandler from './MapEventHandler'
+import MapInteractionController from './MapInteractionController'
 import type { RootState } from '../store/store'
 import type { Trace } from '../types/types'
 import { useAppSelector } from '../hooks/hooks'
@@ -14,6 +15,9 @@ function Map() {
     const traces = useAppSelector((state: RootState) => state.traces.items)
     return (
         <MapContainer center={[20, 0]} zoom={2.5} className="h-full">
+            {/* Control map interactions */}
+            <MapInteractionController />
+
             {/* Handle map events */}
             <MapEventHandler />
 

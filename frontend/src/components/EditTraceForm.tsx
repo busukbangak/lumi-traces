@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import type { ExifData, Trace } from '../types/types'
 import { TraceStatus, TraceType } from '../types/types'
 import axios from 'axios'
-import { useAppSelector } from '../hooks/hooks'
+import { useAppSelector, useAppDispatch } from '../hooks/hooks'
 import { formatDateForInput } from '../utils/utils'
+import { disableMapInteractions, enableMapInteractions } from '../store/slices/uiSlice'
 import exifr from 'exifr'
 
 interface EditTraceFormProps {
@@ -14,6 +15,7 @@ interface EditTraceFormProps {
 }
 
 export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: EditTraceFormProps) {
+    const dispatch = useAppDispatch()
     const { token } = useAppSelector(state => state.auth)
 
     // Form state
@@ -94,6 +96,15 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
             setDateHint('This image does not contain metadata')
         }
     }
+
+    // Disable map interactions when modal opens
+    useEffect(() => {
+        dispatch(disableMapInteractions())
+        
+        return () => {
+            dispatch(enableMapInteractions())
+        }
+    }, [dispatch])
 
     // Check current image EXIF data on mount
     useEffect(() => {
@@ -283,8 +294,45 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
         }
     }
 
+    // Track where mouse down and mouse up occurred to prevent accidental closes
+    const mouseDownOnModalRef = useRef(false)
+    const mouseUpOnModalRef = useRef(false)
+
+    const handleModalMouseDown = (e: React.MouseEvent) => {
+        // Mark that mouse down happened on modal
+        if (e.target === e.currentTarget) {
+            mouseDownOnModalRef.current = true
+        }
+    }
+
+    const handleModalMouseUp = (e: React.MouseEvent) => {
+        // Track if mouse up also happened on modal
+        if (e.target === e.currentTarget) {
+            mouseUpOnModalRef.current = true
+        } else {
+            mouseUpOnModalRef.current = false
+        }
+    }
+
+    const handleModalClick = (e: React.MouseEvent) => {
+        // Only close Modal if BOTH mousedown AND mouseup happened on backdrop
+        if (e.target === e.currentTarget &&
+            mouseDownOnModalRef.current &&
+            mouseUpOnModalRef.current) {
+            onCancel()
+        }
+        // Reset for next interaction
+        mouseDownOnModalRef.current = false
+        mouseUpOnModalRef.current = false
+    }
+
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50">
+        <div
+            className="modal-overlay fixed inset-0 z-[2000] flex items-center justify-center bg-black/50"
+            onMouseDown={handleModalMouseDown}
+            onMouseUp={handleModalMouseUp}
+            onClick={handleModalClick}
+        >
             <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
                 <h2 className="mb-4 text-2xl font-bold">Edit Trace</h2>
 
