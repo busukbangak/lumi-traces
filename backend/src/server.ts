@@ -4,6 +4,7 @@ import cors from 'cors'
 import { connectDB, disconnectDB } from './database'
 import tracesRoutes from './routes/tracesRoutes';
 import imageRoutes from './routes/imagesRoutes';
+import authRoutes from './routes/authRoutes';
 
 const PORT = Number(process.env.PORT) || 3001
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
@@ -18,6 +19,7 @@ async function start() {
   await connectDB(MONGODB_URI, DB_NAME);
 
   // Routes
+  app.use('/api', authRoutes);
   app.use('/api', imageRoutes);
   app.use('/api', tracesRoutes);
 
