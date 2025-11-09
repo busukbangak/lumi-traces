@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../hooks/hooks'
 import { fetchTraces } from '../store/slices/tracesSlice'
-import { userReturn } from '../store/slices/authSlice'
 import Map from '../components/Map'
 import Sidebar from '../components/Sidebar'
 import LogoutButton from '../components/LogoutButton'
@@ -12,10 +11,9 @@ export default function MapPage() {
     const isLoading = useAppSelector((state: RootState) => state.traces.isLoading)
     const error = useAppSelector((state: RootState) => state.traces.error)
 
-    // Load traces and restore user session on mount
+    // Load traces on mount
     useEffect(() => {
         dispatch(fetchTraces())
-        dispatch(userReturn())
     }, [dispatch])
 
     if (isLoading) {
