@@ -9,7 +9,7 @@ export default function Sidebar() {
     <aside className="w-80 bg-white border-r overflow-y-auto p-4">
       <h2 className="text-lg font-semibold mb-2">Visible traces ({visibleTraces.length})</h2>
       {visibleTraces.length === 0 ? (
-        <p className="text-sm text-gray-500">No images in view — pan or zoom the map.</p>
+        <p className="text-sm text-gray-500">No traces in view — pan or zoom the map.</p>
       ) : (
         <div className="space-y-4">
           {visibleTraces.map((marker: Trace) => (
