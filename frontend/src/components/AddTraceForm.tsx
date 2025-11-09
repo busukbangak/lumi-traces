@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from '../hooks/hooks'
 import { formatDateForInput } from '../utils/utils'
 import { disableMapInteractions, enableMapInteractions } from '../store/slices/uiSlice'
 import exifr from 'exifr'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 // TODO: Maybe unify code with EditTraceForm.tsx
 
@@ -31,6 +32,7 @@ export default function AddTraceForm({ onSave, onCancel }: AddTraceFormProps) {
         position: [0, 0] as [number, number],
         tracker: '',
         dateSpotted: formatDateForInput(new Date().toISOString()),
+        recaptchaToken: null as string | null,
     })
 
     // State for image upload
@@ -210,28 +212,38 @@ export default function AddTraceForm({ onSave, onCancel }: AddTraceFormProps) {
             return
         }
 
-        try {
-            // Upload image first
-            const imageFormData = new FormData()
-            imageFormData.append('image', image)
+        // Only require reCAPTCHA if not authenticated
+        if (!token && !formData.recaptchaToken) {
+            setError('Please complete the reCAPTCHA verification')
+            setIsSubmitting(false)
+            return
+        }
 
-            const imageResponse = await axios.post(
-                `${import.meta.env.VITE_API_URL}/images`,
-                imageFormData,
+        try {
+            // Create form data for trace
+            const traceFormData = new FormData()
+            traceFormData.append('image', image)
+            traceFormData.append('title', formData.title)
+            traceFormData.append('description', formData.description)
+            traceFormData.append('status', formData.status)
+            traceFormData.append('traceType', formData.traceType)
+            traceFormData.append('position', JSON.stringify(formData.position))
+            traceFormData.append('tracker', formData.tracker)
+            traceFormData.append('dateSpotted', formData.dateSpotted)
+            
+            // Add reCAPTCHA token if not authenticated
+            if (!token && formData.recaptchaToken) {
+                traceFormData.append('recaptchaToken', formData.recaptchaToken)
+            }
+
+            await axios.post(
+                `${import.meta.env.VITE_API_URL}/traces`,
+                traceFormData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
-                }
-            )
-
-            // Create trace with uploaded imageID
-            await axios.post(
-                `${import.meta.env.VITE_API_URL}/traces`,
-                { ...formData, imageID: imageResponse.data.imageID },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
                 }
             )
 
@@ -461,6 +473,17 @@ export default function AddTraceForm({ onSave, onCancel }: AddTraceFormProps) {
                             />
                         )}
                     </div>
+
+                    {/* reCAPTCHA - only show if not authenticated */}
+                    {!token && (
+                        <div className="flex justify-center">
+                            <ReCAPTCHA
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                onChange={(token) => setFormData({ ...formData, recaptchaToken: token })}
+                                onExpired={() => setFormData({ ...formData, recaptchaToken: null })}
+                            />
+                        </div>
+                    )}
 
                     {/* Buttons */}
                     <div className="flex gap-3 pt-4">
