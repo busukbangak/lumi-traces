@@ -7,6 +7,8 @@ import { formatDateForInput } from '../utils/utils'
 import { disableMapInteractions, enableMapInteractions } from '../store/slices/uiSlice'
 import exifr from 'exifr'
 
+// TODO: Maybe unify code with EditTraceForm.tsx
+
 interface AddTraceFormProps {
     onSave: () => void
     onCancel: () => void
