@@ -5,6 +5,7 @@ import { connectDB, disconnectDB } from './database'
 import tracesRoutes from './routes/tracesRoutes';
 import imageRoutes from './routes/imagesRoutes';
 import authRoutes from './routes/authRoutes';
+import { generalLimiter } from './middlewares/rateLimiter';
 
 const PORT = Number(process.env.PORT) || 3001
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
@@ -13,6 +14,7 @@ const DB_NAME = process.env.DB_NAME || 'lumi-traces'
 const app = express()
 app.use(cors())
 app.use(express.json())
+app.use('/api', generalLimiter)
 
 async function start() {
   // Database Connection
