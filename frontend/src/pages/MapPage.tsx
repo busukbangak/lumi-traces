@@ -4,6 +4,7 @@ import { fetchTraces } from '../store/slices/tracesSlice'
 import { userReturn } from '../store/slices/authSlice'
 import Map from '../components/Map'
 import Sidebar from '../components/Sidebar'
+import LogoutButton from '../components/LogoutButton'
 import type { RootState } from '../store/store'
 
 export default function MapPage() {
@@ -27,6 +28,7 @@ export default function MapPage() {
 
     return (
         <div className="flex h-screen">
+            <LogoutButton />
             <div className="flex-1 relative">
                 <Map />
             </div>
