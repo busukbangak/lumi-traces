@@ -1,0 +1,6 @@
+{
+  "reportIssue": {
+    "subject": "Lumi Traces Report: {title}",
+    "body": "Hello,\n\nI would like to report an issue with this trace:\n\nTrace Title: {title}\nTrace ID: {id}\nLocation: {location}\nDate Spotted: {dateSpotted}\n\nIssue Description:\n[Please describe the issue - e.g., incorrect location, inappropriate content, trace no longer exists, etc.]\n\nAdditional Information:\n[Please provide any additional details that might be helpful]\n\nPhoto Evidence:\n[If possible, please attach a photo as proof]\n\nThank you!"
+  }
+}

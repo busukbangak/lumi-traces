@@ -8,6 +8,7 @@ import axios from "axios";
 import { fetchTraces } from "../store/slices/tracesSlice";
 import EditTraceForm from "./EditTraceForm";
 import type { Marker as LeafletMarker } from "leaflet";
+import emailTemplates from "../assets/emailTemplates.json";
 
 interface TraceProps {
     trace: Trace
@@ -69,30 +70,18 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                                 )}
                                 <button
                                     onClick={() => {
-                                        const subject = encodeURIComponent(`Lumi Traces Report: ${trace.title}`)
+                                        const subject = encodeURIComponent(
+                                            emailTemplates.reportIssue.subject.replace('{title}', trace.title)
+                                        )
                                         const body = encodeURIComponent(
-`Hello,
-
-I would like to report an issue with this trace:
-
-Trace Title: ${trace.title}
-Trace ID: ${trace._id}
-Location: ${trace.position[0]}, ${trace.position[1]}
-Date Spotted: ${trace.dateSpotted}
-
-Issue Description:
-[Please describe the issue - e.g., incorrect location, inappropriate content, trace no longer exists, etc.]
-
-Additional Information:
-[Please provide any additional details that might be helpful]
-
-Photo Evidence:
-[If possible, please attach a photo as proof]
-
-Thank you!`
-                                    )
-                                    window.open(`mailto:${import.meta.env.VITE_REPORT_EMAIL}?subject=${subject}&body=${body}`, '_blank')
-                                }}
+                                            emailTemplates.reportIssue.body
+                                                .replace('{title}', trace.title)
+                                                .replace('{id}', trace._id)
+                                                .replace('{location}', `${trace.position[0]}, ${trace.position[1]}`)
+                                                .replace('{dateSpotted}', trace.dateSpotted)
+                                        )
+                                        window.open(`mailto:${import.meta.env.VITE_REPORT_EMAIL}?subject=${subject}&body=${body}`, '_blank')
+                                    }}
                                 className="rounded-full p-1.5 text-orange-500 hover:bg-orange-500 hover:text-white transition-colors"
                                 title="Report Issue"
                             >
