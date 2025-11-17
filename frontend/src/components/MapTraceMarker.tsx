@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Marker } from "react-leaflet/Marker";
 import { Popup } from "react-leaflet/Popup";
+import { useMap } from "react-leaflet";
 import { TraceType, type Trace } from "../types/types";
 import { getMarkerIcon } from "../utils/utils";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
@@ -9,6 +10,7 @@ import { fetchTraces } from "../store/slices/tracesSlice";
 import EditTraceForm from "./EditTraceForm";
 import type { Marker as LeafletMarker } from "leaflet";
 import emailTemplates from "../assets/emailTemplates.json";
+import { clearSelectedTrace, selectTrace } from "../store/slices/uiSlice";
 
 interface TraceProps {
     trace: Trace
@@ -16,9 +18,36 @@ interface TraceProps {
 
 export default function MapTraceMarker({ trace }: TraceProps) {
     const dispatch = useAppDispatch()
+    const map = useMap()
     const { isAuthenticated, token, user } = useAppSelector(state => state.auth)
+    const selectedTraceId = useAppSelector(state => state.ui.selectedTraceId)
     const [isEditing, setIsEditing] = useState(false)
     const markerRef = useRef<LeafletMarker>(null)
+
+    useEffect(() => {
+        console.log('MapTraceMarker: selectedTraceId changed', { selectedTraceId, traceId: trace._id, matches: selectedTraceId === trace._id })
+        if (selectedTraceId === trace._id && markerRef.current) {
+            console.log('MapTraceMarker: Flying to trace', trace.title, trace.position)
+            // Fly to the marker position
+            map.flyTo(trace.position, 15, {
+                duration: 1.5
+            })
+            // Open the popup
+            markerRef.current.openPopup()
+            
+            // Listen for popup close event to clear selection
+            const marker = markerRef.current
+            const handlePopupClose = () => {
+                dispatch(clearSelectedTrace())
+            }
+            marker.on('popupclose', handlePopupClose)
+            
+            // Cleanup listener on unmount or when selectedTraceId changes
+            return () => {
+                marker.off('popupclose', handlePopupClose)
+            }
+        }
+    }, [selectedTraceId, trace._id, trace.position, trace.title, map, dispatch])
 
     const handleDelete = async () => {
         if (!window.confirm(`Are you sure you want to delete "${trace.title}"?`)) {
@@ -49,9 +78,21 @@ export default function MapTraceMarker({ trace }: TraceProps) {
         markerRef.current?.closePopup()
     }
 
+    const handleMarkerClick = () => {
+        dispatch(selectTrace(trace._id))
+    }
+
     return (
         <>
-            <Marker key={trace._id} position={trace.position} icon={getMarkerIcon(trace.traceType as TraceType)} ref={markerRef}>
+            <Marker 
+                key={trace._id} 
+                position={trace.position} 
+                icon={getMarkerIcon(trace.traceType as TraceType)} 
+                ref={markerRef}
+                eventHandlers={{
+                    click: handleMarkerClick
+                }}
+            >
                 <Popup closeOnClick={true} autoClose={true} closeButton={false}>
                     <div>
                         <div className="flex items-start justify-between mb-2">
