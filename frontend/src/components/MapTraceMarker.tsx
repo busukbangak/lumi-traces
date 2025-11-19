@@ -26,30 +26,46 @@ export default function MapTraceMarker({ trace }: TraceProps) {
     const [showImagePreview, setShowImagePreview] = useState(false)
     const markerRef = useRef<LeafletMarker>(null)
 
+    // Handle trace selection and popup opening
     useEffect(() => {
         console.log('MapTraceMarker: selectedTraceId changed', { selectedTraceId, traceId: trace._id, matches: selectedTraceId === trace._id })
         if (selectedTraceId === trace._id && markerRef.current) {
             console.log('MapTraceMarker: Flying to trace', trace.title, trace.position)
             // Fly to the marker position
-            map.flyTo(trace.position, 15, {
+            map.flyTo(trace.position, 12.5, {
                 duration: 1.5
             })
             // Open the popup
             markerRef.current.openPopup()
-            
-            // Listen for popup close event to clear selection
+        }
+    }, [selectedTraceId, trace._id, trace.position, trace.title, map])
+
+    // Handle popup close listener
+    useEffect(() => {
+        if (selectedTraceId === trace._id && markerRef.current) {
             const marker = markerRef.current
             const handlePopupClose = () => {
+                // Prevent popup from closing if any modal is open
+                if (isEditing || showImagePreview) {
+                    // Reopen the popup immediately
+                    setTimeout(() => {
+                        if (markerRef.current) {
+                            markerRef.current.openPopup()
+                        }
+                    }, 0)
+                    return
+                }
+                // Only clear selection if no modal is open
                 dispatch(clearSelectedTrace())
             }
             marker.on('popupclose', handlePopupClose)
             
-            // Cleanup listener on unmount or when selectedTraceId changes
+            // Cleanup listener on unmount or when dependencies change
             return () => {
                 marker.off('popupclose', handlePopupClose)
             }
         }
-    }, [selectedTraceId, trace._id, trace.position, trace.title, map, dispatch])
+    }, [selectedTraceId, trace._id, dispatch, isEditing, showImagePreview])
 
     const handleDelete = async () => {
         if (!window.confirm(`Are you sure you want to delete "${trace.title}"?`)) {
@@ -88,6 +104,14 @@ export default function MapTraceMarker({ trace }: TraceProps) {
         setShowImagePreview(true)
     }
 
+    const handleImagePreviewClose = () => {
+        setShowImagePreview(false)
+    }
+
+    const handleEditCancel = () => {
+        setIsEditing(false)
+    }
+
     return (
         <>
             <Marker 
@@ -99,7 +123,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                     click: handleMarkerClick
                 }}
             >
-                <Popup closeOnClick={true} autoClose={true} closeButton={false}>
+                <Popup closeOnClick={true} autoClose={false} closeButton={false}>
                     <div>
                         <div className="flex items-start justify-between mb-2">
                             <h3 className="font-bold text-lg flex-1">{trace.title}</h3>
@@ -175,7 +199,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                 <EditTraceFormModal
                     trace={trace}
                     onSave={handleEditSave}
-                    onCancel={() => setIsEditing(false)}
+                    onCancel={handleEditCancel}
                     onDelete={handleDelete}
                 />
             )}
@@ -184,7 +208,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                 <ImagePreviewModal
                     imageUrl={`${import.meta.env.VITE_API_URL}/images/${trace.imageID}`}
                     title={trace.title}
-                    onClose={() => setShowImagePreview(false)}
+                    onClose={handleImagePreviewClose}
                 />
             )}
         </>
