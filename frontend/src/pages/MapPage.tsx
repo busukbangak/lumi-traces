@@ -3,8 +3,8 @@ import { useAppDispatch, useAppSelector } from '../hooks/hooks'
 import { fetchTraces } from '../store/slices/tracesSlice'
 import Map from '../components/Map'
 import Sidebar from '../components/Sidebar'
-import LogoutButton from '../components/LogoutButton'
 import AddTraceButton from '../components/AddTraceButton'
+import WelcomeOverlay from '../components/WelcomeOverlay'
 import type { RootState } from '../store/store'
 
 export default function MapPage() {
@@ -29,8 +29,8 @@ export default function MapPage() {
         <div className="flex h-screen">
             <div className="flex-1 relative">
                 <Map />
-                <LogoutButton />
                 <AddTraceButton />
+                <WelcomeOverlay />
             </div>
             <Sidebar />
         </div>

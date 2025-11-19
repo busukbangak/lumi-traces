@@ -123,7 +123,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                     click: handleMarkerClick
                 }}
             >
-                <Popup closeOnClick={true} autoClose={false} closeButton={false}>
+                <Popup closeOnClick={true} autoClose={true} closeButton={false}>
                     <div>
                         <div className="flex items-start justify-between mb-2">
                             <h3 className="font-bold text-lg flex-1">{trace.title}</h3>
