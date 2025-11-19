@@ -4,7 +4,11 @@ import type { Trace } from '../types/types'
 import { selectTrace } from '../store/slices/uiSlice'
 import { logout } from '../store/slices/authSlice'
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const dispatch = useAppDispatch()
   const visibleTraces = useAppSelector((state: RootState) => state.traces.visible)
   const selectedTraceId = useAppSelector((state: RootState) => state.ui.selectedTraceId)
@@ -13,6 +17,7 @@ export default function Sidebar() {
   const handleTraceClick = (traceId: string) => {
     console.log('Sidebar: Clicking trace', traceId)
     dispatch(selectTrace(traceId))
+    onClose?.() // Close sidebar on mobile after selecting a trace (no-op on desktop)
   }
 
   const handleLogout = () => {
@@ -20,32 +25,32 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-80 bg-white border-r flex flex-col h-full">
+    <aside className="w-full lg:w-80 bg-white lg:border-r shadow-lg lg:shadow-none flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
-      <h2 className="text-lg font-semibold mb-2">Visible traces ({visibleTraces.length})</h2>
-      {visibleTraces.length === 0 ? (
-        <p className="text-sm text-gray-500">No traces in view — pan or zoom the map.</p>
-      ) : (
-        <div className="space-y-4">
-          {visibleTraces.map((marker: Trace) => (
-            <div
-              key={marker._id}
-              className={`border rounded overflow-hidden cursor-pointer transition-all ${selectedTraceId === marker._id
-                ? 'ring-2 ring-blue-500 shadow-lg scale-105'
-                : 'hover:shadow-lg hover:scale-102'
-                }`}
-              onClick={() => handleTraceClick(marker._id)}
-            >
-              <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} className="w-full h-36 object-cover" />
-              <div className="p-2">
-                <div className="font-medium">{marker.title}</div>
-                <div className="text-sm text-gray-600">{marker.status}</div>
+        <h2 className="text-lg font-semibold mb-2">Visible traces ({visibleTraces.length})</h2>
+        {visibleTraces.length === 0 ? (
+          <p className="text-sm text-gray-500">No traces in view — pan or zoom the map.</p>
+        ) : (
+          <div className="space-y-4">
+            {visibleTraces.map((marker: Trace) => (
+              <div
+                key={marker._id}
+                className={`border rounded overflow-hidden cursor-pointer transition-all ${selectedTraceId === marker._id
+                  ? 'ring-2 ring-blue-500 shadow-lg scale-105'
+                  : 'hover:shadow-lg hover:scale-102'
+                  }`}
+                onClick={() => handleTraceClick(marker._id)}
+              >
+                <img src={`${import.meta.env.VITE_API_URL}/images/${marker.imageID}`} alt={marker.title} className="w-full h-36 object-cover" />
+                <div className="p-2">
+                  <div className="font-medium">{marker.title}</div>
+                  <div className="text-sm text-gray-600">{marker.status}</div>
+                </div>
               </div>
-            </div>
-          )
-          )}
-        </div>
-      )}
+            )
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sticky logout button at bottom */}

@@ -23,11 +23,11 @@ export default function WelcomeOverlay() {
     }
 
     return (
-        <div className="fixed bottom-4 left-4 z-[1000] max-w-md">
+        <div className="fixed bottom-4 left-4 right-4 md:right-auto z-[1000] max-w-md">
             {isExpanded ? (
-                <div className="bg-white rounded-lg shadow-xl p-6 border-2 border-blue-500">
+                <div className="bg-white rounded-lg shadow-xl p-4 md:p-6 border-2 border-blue-500 max-h-[70vh] overflow-y-auto">
                     <div className="flex items-start justify-between mb-4">
-                        <h2 className="text-xl font-bold text-blue-600">Welcome to Lumi Traces! 🌟</h2>
+                        <h2 className="text-lg md:text-xl font-bold text-blue-600">Welcome to Lumi Traces! 🌟</h2>
                         <button
                             onClick={handleDismiss}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -84,13 +84,13 @@ export default function WelcomeOverlay() {
             ) : (
                 <button
                     onClick={handleToggle}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-lg transition-all flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 md:px-4 rounded-lg shadow-lg transition-all flex items-center gap-2"
                     title="Show welcome message"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
                     </svg>
-                    <span>Help</span>
+                    <span className="text-sm md:text-base">Help</span>
                 </button>
             )}
         </div>

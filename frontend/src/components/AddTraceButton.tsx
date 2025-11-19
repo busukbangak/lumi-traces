@@ -25,7 +25,7 @@ export default function AddTraceButton() {
             {/* Add Trace Button - positioned relative to map */}
             <button
                 onClick={() => setShowAddForm(true)}
-                className="absolute bottom-6 right-4 z-[1000] bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-colors"
+                className="absolute bottom-6 right-4 lg:bottom-6 lg:right-4 z-[1000] bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center shadow-lg transition-colors"
                 title="Add New Trace"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">

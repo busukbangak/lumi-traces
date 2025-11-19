@@ -8,6 +8,26 @@ export const useAppDispatch: () => AppDispatch = useDispatch
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
+export function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkIsMobile = () => {
+            setIsMobile(window.innerWidth < 1024) // lg breakpoint
+        }
+
+        // Initial check
+        checkIsMobile()
+
+        // Listen for resize events
+        window.addEventListener('resize', checkIsMobile)
+
+        return () => window.removeEventListener('resize', checkIsMobile)
+    }, [])
+
+    return isMobile
+}
+
 export function useVisibleTraces(traces: Trace[]) {
     const map = useMap()
     const [visibleTraces, setVisibleTraces] = useState<Trace[]>([])
