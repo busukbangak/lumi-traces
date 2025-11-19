@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import axios from "axios";
 import { fetchTraces } from "../store/slices/tracesSlice";
 import EditTraceForm from "./EditTraceForm";
+import ImagePreviewModal from "./ImagePreviewModal";
 import type { Marker as LeafletMarker } from "leaflet";
 import emailTemplates from "../assets/emailTemplates.json";
 import { clearSelectedTrace, selectTrace } from "../store/slices/uiSlice";
@@ -22,6 +23,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
     const { isAuthenticated, token, user } = useAppSelector(state => state.auth)
     const selectedTraceId = useAppSelector(state => state.ui.selectedTraceId)
     const [isEditing, setIsEditing] = useState(false)
+    const [showImagePreview, setShowImagePreview] = useState(false)
     const markerRef = useRef<LeafletMarker>(null)
 
     useEffect(() => {
@@ -82,6 +84,10 @@ export default function MapTraceMarker({ trace }: TraceProps) {
         dispatch(selectTrace(trace._id))
     }
 
+    const handleImageClick = () => {
+        setShowImagePreview(true)
+    }
+
     return (
         <>
             <Marker 
@@ -131,6 +137,15 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                                 </svg>
                             </button>
                             <button
+                                onClick={handleImageClick}
+                                className="rounded-full p-1.5 text-green-500 hover:bg-green-500 hover:text-white transition-colors"
+                                title="Enlarge Image"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                </svg>
+                            </button>
+                            <button
                                 onClick={handleClosePopup}
                                 className="rounded-full p-1.5 text-gray-500 hover:bg-gray-200 transition-colors"
                                 title="Close"
@@ -145,7 +160,9 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                         <img
                             src={`${import.meta.env.VITE_API_URL}/images/${trace.imageID}`}
                             alt={trace.title}
-                            className="w-full h-auto rounded mb-2"
+                            className="w-full h-auto rounded mb-2 cursor-zoom-in hover:opacity-90 transition-opacity"
+                            onClick={handleImageClick}
+                            title="Click to enlarge"
                         />
                         <p className="text-sm text-gray-600 mb-2">Status: {trace.status}</p>
                         <p className="text-sm text-gray-600 mb-2">Tracker: {trace.tracker}</p>
@@ -160,6 +177,14 @@ export default function MapTraceMarker({ trace }: TraceProps) {
                     onSave={handleEditSave}
                     onCancel={() => setIsEditing(false)}
                     onDelete={handleDelete}
+                />
+            )}
+
+            {showImagePreview && (
+                <ImagePreviewModal
+                    imageUrl={`${import.meta.env.VITE_API_URL}/images/${trace.imageID}`}
+                    title={trace.title}
+                    onClose={() => setShowImagePreview(false)}
                 />
             )}
         </>
