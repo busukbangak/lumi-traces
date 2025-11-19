@@ -7,7 +7,7 @@ import { getMarkerIcon } from "../utils/utils";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import axios from "axios";
 import { fetchTraces } from "../store/slices/tracesSlice";
-import EditTraceForm from "./EditTraceForm";
+import EditTraceFormModal from "./EditTraceFormModal";
 import ImagePreviewModal from "./ImagePreviewModal";
 import type { Marker as LeafletMarker } from "leaflet";
 import emailTemplates from "../assets/emailTemplates.json";
@@ -172,7 +172,7 @@ export default function MapTraceMarker({ trace }: TraceProps) {
             </Marker>
 
             {isEditing && (
-                <EditTraceForm
+                <EditTraceFormModal
                     trace={trace}
                     onSave={handleEditSave}
                     onCancel={() => setIsEditing(false)}

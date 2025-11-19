@@ -1,40 +1,42 @@
 import { useState, useRef, useEffect } from 'react'
-import type { ExifData, Trace } from '../types/types'
+import type { ExifData } from '../types/types'
 import { TraceStatus, TraceType } from '../types/types'
 import axios from 'axios'
 import { useAppSelector, useAppDispatch } from '../hooks/hooks'
 import { formatDateForInput } from '../utils/utils'
 import { disableMapInteractions, enableMapInteractions } from '../store/slices/uiSlice'
 import exifr from 'exifr'
+import ReCAPTCHA from 'react-google-recaptcha'
 
-interface EditTraceFormProps {
-    trace: Trace
+// TODO: Maybe unify code with EditTraceFormModal.tsx
+
+interface AddTraceFormModalProps {
     onSave: () => void
     onCancel: () => void
-    onDelete: () => Promise<void>
 }
 
-export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: EditTraceFormProps) {
+export default function AddTraceFormModal({ onSave, onCancel }: AddTraceFormModalProps) {
     const dispatch = useAppDispatch()
-    const { token } = useAppSelector(state => state.auth)
+    const { token, user } = useAppSelector(state => state.auth)
+    const isAdmin = user?.role === 'admin'
 
     // Form state
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [formData, setFormData] = useState({
-        title: trace.title,
-        description: trace.description,
-        status: trace.status,
-        traceType: trace.traceType,
-        position: trace.position,
-        tracker: trace.tracker,
-        dateSpotted: formatDateForInput(trace.dateSpotted),
-        imageID: trace.imageID
+        title: '',
+        description: '',
+        status: TraceStatus.PENDING,
+        traceType: TraceType.Adventure,
+        position: [0, 0] as [number, number],
+        tracker: '',
+        dateSpotted: formatDateForInput(new Date().toISOString()),
+        recaptchaToken: null as string | null,
     })
 
-    // State for new image upload
-    const [newImage, setNewImage] = useState<File | null>(null)
+    // State for image upload
+    const [image, setImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
     // State for image EXIF data
@@ -44,7 +46,7 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
     const [dateHint, setDateHint] = useState<string | null>(null)
 
     // Process EXIF data and update state
-    const processExifData = (exifData: ExifData | undefined, currentPosition: [number, number], currentDate: string) => {
+    const processExifData = (exifData: ExifData | undefined) => {
         if (exifData) {
             console.log('=== Image EXIF Metadata ===')
             console.log('Full EXIF data:', exifData)
@@ -56,14 +58,12 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
 
                 setImageGPS({ lat: exifData.latitude, lng: exifData.longitude })
 
-                // Check if current position differs from image GPS
-                const latDiff = Math.abs(currentPosition[0] - exifData.latitude)
-                const lngDiff = Math.abs(currentPosition[1] - exifData.longitude)
-                if (latDiff > 0.0001 || lngDiff > 0.0001) {
-                    setGpsHint('Position differs from image GPS data')
-                } else {
-                    setGpsHint(null)
-                }
+                // Auto-fill position from image GPS
+                setFormData(prev => ({
+                    ...prev,
+                    position: [exifData.latitude!, exifData.longitude!]
+                }))
+                setGpsHint(null)
             } else {
                 console.log('No GPS data found in image')
                 setImageGPS(null)
@@ -77,12 +77,11 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
                 const formattedDate = formatDateForInput(dateTaken.toISOString())
                 setImageDateTaken(formattedDate)
 
-                // Check if current date differs from image date
-                if (currentDate !== formattedDate) {
-                    setDateHint('Date differs from image date taken')
-                } else {
-                    setDateHint(null)
-                }
+                // Auto-fill date
+                setFormData(prev => ({
+                    ...prev,
+                    dateSpotted: formattedDate
+                }))
             } else {
                 setImageDateTaken(null)
                 setDateHint('This image does not contain date information')
@@ -100,35 +99,16 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
     // Disable map interactions when modal opens
     useEffect(() => {
         dispatch(disableMapInteractions())
-        
+
         return () => {
             dispatch(enableMapInteractions())
         }
     }, [dispatch])
 
-    // Check current image EXIF data on mount
-    useEffect(() => {
-        const checkCurrentImageExif = async () => {
-            try {
-                // Fetch the current image as a blob
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/images/${trace.imageID}`)
-                const blob = await response.blob()
-
-                // Parse EXIF data
-                const exifData = await exifr.parse(blob)
-                processExifData(exifData, trace.position, formatDateForInput(trace.dateSpotted))
-            } catch (err) {
-                console.warn('Failed to read current image EXIF data:', err)
-            }
-        }
-
-        checkCurrentImageExif()
-    }, [trace.imageID, trace.position, trace.dateSpotted])
-
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            setNewImage(file)
+            setImage(file)
 
             // Reset hints when new image is selected
             setGpsHint(null)
@@ -137,7 +117,7 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
             // Read EXIF data
             try {
                 const exifData = await exifr.parse(file)
-                processExifData(exifData, formData.position, formData.dateSpotted)
+                processExifData(exifData)
             } catch (err) {
                 console.warn('Failed to read EXIF data:', err)
                 setImageGPS(null)
@@ -155,27 +135,17 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
         }
     }
 
-    const handleRemoveNewImage = async () => {
-        setNewImage(null)
+    const handleRemoveImage = () => {
+        setImage(null)
         setImagePreview(null)
+        setImageGPS(null)
+        setImageDateTaken(null)
+        setGpsHint(null)
+        setDateHint(null)
 
-        // Clear the file input so the same file can be selected again
+        // Clear the file input
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
-        }
-
-        // Re-check the current/original image EXIF data
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/images/${trace.imageID}`)
-            const blob = await response.blob()
-            const exifData = await exifr.parse(blob)
-            processExifData(exifData, formData.position, formData.dateSpotted)
-        } catch (err) {
-            console.warn('Failed to re-read current image EXIF data:', err)
-            setImageGPS(null)
-            setImageDateTaken(null)
-            setGpsHint(null)
-            setDateHint(null)
         }
     }
 
@@ -199,7 +169,6 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
         }
     }
 
-    // Check for position changes
     const handlePositionChange = (lat: number, lng: number) => {
         setFormData({
             ...formData,
@@ -218,7 +187,6 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
         }
     }
 
-    // Check for date changes
     const handleDateChange = (date: string) => {
         setFormData({
             ...formData,
@@ -238,57 +206,52 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
         setIsSubmitting(true)
         setError(null)
 
+        if (!image) {
+            setError('Please select an image')
+            setIsSubmitting(false)
+            return
+        }
+
+        // Only require reCAPTCHA if not authenticated
+        if (!token && !formData.recaptchaToken) {
+            setError('Please complete the reCAPTCHA verification')
+            setIsSubmitting(false)
+            return
+        }
+
         try {
-            let updatedImageID = formData.imageID
-            const oldImageID = formData.imageID
-
-            // If new image selected, upload it first
-            if (newImage) {
-                const imageFormData = new FormData()
-                imageFormData.append('image', newImage)
-
-                const imageResponse = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/images`,
-                    imageFormData,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    }
-                )
-                updatedImageID = imageResponse.data.imageID
+            // Create form data for trace
+            const traceFormData = new FormData()
+            traceFormData.append('image', image)
+            traceFormData.append('title', formData.title)
+            traceFormData.append('description', formData.description)
+            traceFormData.append('status', formData.status)
+            traceFormData.append('traceType', formData.traceType)
+            traceFormData.append('position', JSON.stringify(formData.position))
+            traceFormData.append('tracker', formData.tracker)
+            traceFormData.append('dateSpotted', formData.dateSpotted)
+            
+            // Add reCAPTCHA token if not authenticated
+            if (!token && formData.recaptchaToken) {
+                traceFormData.append('recaptchaToken', formData.recaptchaToken)
             }
 
-            // Update trace with new data (and possibly new imageID)
-            await axios.put(
-                `${import.meta.env.VITE_API_URL}/traces/${trace._id}`,
-                { ...formData, imageID: updatedImageID },
+            await axios.post(
+                `${import.meta.env.VITE_API_URL}/traces`,
+                traceFormData,
                 {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
             )
 
-            // Delete old image from GridFS if a new one was uploaded
-            if (newImage && oldImageID !== updatedImageID) {
-                try {
-                    await axios.delete(
-                        `${import.meta.env.VITE_API_URL}/images/${oldImageID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` }
-                        }
-                    )
-                } catch (deleteErr) {
-                    // Log but don't fail the update if image deletion fails
-                    console.warn('Failed to delete old image:', deleteErr)
-                }
-            }
-
             onSave()
         } catch (err) {
-            console.error('Failed to update trace:', err)
+            console.error('Failed to create trace:', err)
             const error = err as { response?: { data?: { error?: string } } }
-            setError(error.response?.data?.error || 'Failed to update trace')
+            setError(error.response?.data?.error || 'Failed to create trace')
         } finally {
             setIsSubmitting(false)
         }
@@ -299,21 +262,19 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
     const mouseUpOnModalRef = useRef(false)
 
     const handleModalMouseDown = (e: React.MouseEvent) => {
-        // Mark that mouse down happened on modal
         if (e.target === e.currentTarget) {
             mouseDownOnModalRef.current = true
         }
     }
 
     const handleModalMouseUp = (e: React.MouseEvent) => {
-        // Track if mouse up also happened on modal
         if (e.target === e.currentTarget) {
             mouseUpOnModalRef.current = true
         }
     }
 
     const handleModalClick = (e: React.MouseEvent) => {
-        // Only close Modal if BOTH mousedown AND mouseup happened on backdrop
+        // Only close if BOTH mousedown AND mouseup happened on backdrop
         if (e.target === e.currentTarget &&
             mouseDownOnModalRef.current &&
             mouseUpOnModalRef.current) {
@@ -331,8 +292,10 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
             onMouseUp={handleModalMouseUp}
             onClick={handleModalClick}
         >
-            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                <h2 className="mb-4 text-2xl font-bold">Edit Trace</h2>
+            <div
+                className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl"
+            >
+                <h2 className="mb-4 text-2xl font-bold">Add New Trace</h2>
 
                 {error && (
                     <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
@@ -370,8 +333,9 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
                         <label className="block text-sm font-medium text-gray-700">Status</label>
                         <select
                             value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value as TraceStatus })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            disabled={!isAdmin}
                         >
                             {Object.values(TraceStatus).map((status) => (
                                 <option key={status} value={status}>
@@ -379,6 +343,9 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
                                 </option>
                             ))}
                         </select>
+                        {!isAdmin && (
+                            <p className="mt-1 text-sm text-gray-500">Only admins can change status</p>
+                        )}
                     </div>
 
                     {/* Trace Type */}
@@ -386,7 +353,7 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
                         <label className="block text-sm font-medium text-gray-700">Trace Type</label>
                         <select
                             value={formData.traceType}
-                            onChange={(e) => setFormData({ ...formData, traceType: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, traceType: e.target.value as TraceType })}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                         >
                             {Object.values(TraceType).map((type) => (
@@ -477,78 +444,64 @@ export default function EditTraceForm({ trace, onSave, onCancel, onDelete }: Edi
                         )}
                     </div>
 
-                    {/* Current Image */}
+                    {/* Image Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Current Image</label>
-                        {!imagePreview && (
-                            <img
-                                src={`${import.meta.env.VITE_API_URL}/images/${formData.imageID}`}
-                                alt="Current trace"
-                                className="w-full h-auto rounded mb-2"
-                            />
-                        )}
-                        {imagePreview && (
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Image *</label>
+                        {imagePreview ? (
                             <div>
                                 <img
                                     src={imagePreview}
-                                    alt="New preview"
+                                    alt="Preview"
                                     className="w-full h-auto rounded mb-2"
                                 />
                                 <button
                                     type="button"
-                                    onClick={handleRemoveNewImage}
+                                    onClick={handleRemoveImage}
                                     className="text-sm text-red-600 hover:text-red-700"
                                 >
-                                    Remove new image
+                                    Remove image
                                 </button>
                             </div>
+                        ) : (
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                                required
+                            />
                         )}
                     </div>
 
-                    {/* Upload New Image */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Change Image (Optional)</label>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Upload a new image to replace the current one</p>
-                    </div>
+                    {/* reCAPTCHA - only show if not authenticated */}
+                    {!token && (
+                        <div className="flex justify-center">
+                            <ReCAPTCHA
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                onChange={(token) => setFormData({ ...formData, recaptchaToken: token })}
+                                onExpired={() => setFormData({ ...formData, recaptchaToken: null })}
+                            />
+                        </div>
+                    )}
 
                     {/* Buttons */}
-                    <div className="space-y-3 pt-4">
+                    <div className="flex gap-3 pt-4">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                        >
+                            {isSubmitting ? 'Creating...' : 'Create Trace'}
+                        </button>
                         <button
                             type="button"
-                            onClick={async () => {
-                                await onDelete()
-                                onCancel()
-                            }}
+                            onClick={onCancel}
                             disabled={isSubmitting}
-                            className="w-full rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:bg-gray-400"
+                            className="flex-1 rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 disabled:bg-gray-200"
                         >
-                            Delete Trace
+                            Cancel
                         </button>
-                        <div className="flex gap-3">
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
-                            >
-                                {isSubmitting ? 'Saving...' : 'Save Changes'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onCancel}
-                                disabled={isSubmitting}
-                                className="flex-1 rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 disabled:bg-gray-200"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-
                     </div>
                 </form>
             </div>

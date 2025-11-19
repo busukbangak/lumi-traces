@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useAppDispatch } from '../hooks/hooks'
 import { fetchTraces } from '../store/slices/tracesSlice'
-import AddTraceForm from './AddTraceForm'
+import AddTraceFormModal from './AddTraceFormModal'
 
 export default function AddTraceButton() {
     const dispatch = useAppDispatch()
     const [showAddForm, setShowAddForm] = useState(false)
 
-    const handleAddTrace = () => {
+    const handleSave = () => {
         setShowAddForm(false)
         dispatch(fetchTraces()) // Reload traces after adding
     }
@@ -16,8 +16,8 @@ export default function AddTraceButton() {
         <>
             {/* Add Trace Modal */}
             {showAddForm && (
-                <AddTraceForm
-                    onSave={handleAddTrace}
+                <AddTraceFormModal
+                    onSave={handleSave}
                     onCancel={() => setShowAddForm(false)}
                 />
             )}
