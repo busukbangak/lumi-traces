@@ -9,7 +9,8 @@ import { generalLimiter } from './middlewares/rateLimiter';
 
 const PORT = Number(process.env.PORT) || 3001
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
-const DB_NAME = process.env.DB_NAME || 'lumi-traces'
+const NODE_ENV = process.env.NODE_ENV || 'development'
+const DB_NAME = NODE_ENV 
 
 const app = express()
 app.use(cors())
