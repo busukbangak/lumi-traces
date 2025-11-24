@@ -11,6 +11,5 @@
       "src": "/(.*)",
       "dest": "dist/server.js"
     }
-  ],
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+  ]
 }
