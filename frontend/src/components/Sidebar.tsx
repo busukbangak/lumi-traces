@@ -10,7 +10,7 @@ interface SidebarProps {
 
 export default function Sidebar({ onClose }: SidebarProps) {
   const dispatch = useAppDispatch()
-  const visibleTraces = useAppSelector((state: RootState) => state.traces.visible)
+  const visibleTraces = useAppSelector((state: RootState) => state.traces.visible) || []
   const selectedTraceId = useAppSelector((state: RootState) => state.ui.selectedTraceId)
   const { isAuthenticated, user } = useAppSelector(state => state.auth)
 

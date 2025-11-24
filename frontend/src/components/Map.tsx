@@ -12,7 +12,7 @@ const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyrigh
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 function Map() {
-    const traces = useAppSelector((state: RootState) => state.traces.items)
+    const traces = useAppSelector((state: RootState) => state.traces.items) || []
     return (
         <MapContainer center={[20, 0]} zoom={2.5} className="h-full">
             {/* Control map interactions */}

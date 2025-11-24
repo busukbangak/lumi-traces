@@ -39,8 +39,13 @@ export const createTrace = async (req: Request, res: Response) => {
 };
 
 export const getTraces = async (req: Request, res: Response) => {
-    const markers = await Trace.find();
-    res.status(200).json(markers);
+    try {
+        const markers = await Trace.find();
+        res.status(200).json(markers);
+    } catch (error: any) {
+        console.error('Error fetching traces:', error);
+        res.status(500).json({ error: 'Failed to fetch traces' });
+    }
 };
 
 export const getTraceById = async (req: Request, res: Response) => {
