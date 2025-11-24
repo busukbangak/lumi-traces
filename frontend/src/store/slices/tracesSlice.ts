@@ -21,11 +21,6 @@ export const fetchTraces = createAsyncThunk<Trace[], void, { rejectValue: string
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await axios.get<Trace[]>(`${import.meta.env.VITE_API_URL}/traces`)
-      // Ensure we always return an array
-      if (!Array.isArray(data)) {
-        console.error('API returned non-array data:', data)
-        return rejectWithValue('Invalid response format from server')
-      }
       return data
     } catch (err) {
       if (axios.isAxiosError(err)) {
