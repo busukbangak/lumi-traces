@@ -9,6 +9,9 @@ A full-stack application for managing and visualizing lumis traces on an interac
 - Real-time trace status management (Active, Pending, Missing, Removed, Invalid)
 - Sidebar with visible traces list
 - RESTful API endpoints
+- reCAPTCHA integration
+- rate limiter
+- BE image uploads
 ## Tech Stack
 
 - **Frontend**: React + TypeScript + Vite + Leaflet
