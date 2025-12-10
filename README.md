@@ -2,12 +2,6 @@
 
 A full-stack application for managing and visualizing lumis traces on an interactive map.
 
-## Tech Stack
-
-- **Frontend**: React + TypeScript + Vite + Leaflet
-- **Backend**: Node.js + Express + TypeScript
-- **Database**: MongoDB
-
 ## Features
 
 - Interactive map with trace markers
@@ -15,6 +9,11 @@ A full-stack application for managing and visualizing lumis traces on an interac
 - Real-time trace status management (Active, Pending, Missing, Removed, Invalid)
 - Sidebar with visible traces list
 - RESTful API endpoints
+## Tech Stack
+
+- **Frontend**: React + TypeScript + Vite + Leaflet
+- **Backend**: Node.js + Express + TypeScript
+- **Database**: MongoDB
 
 ## Development Notes
 - Initial design and code suggestions generated using GitHub Copilot Agent.
