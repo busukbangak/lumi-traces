@@ -1,4 +1,4 @@
-# Lumi Traces App
+# Lumi Traces
 
 A full-stack application for managing and visualizing lumis traces on an interactive map.
 
